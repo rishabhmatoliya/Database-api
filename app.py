@@ -60,6 +60,18 @@ def get_all_users():
     users_list = [dict(id=u.id, username=u.username, phone=u.phone, email=u.email) for u in users]
     return jsonify(users_list)
 
+# Route: Delete User (Admin only)
+@app.route('/delete_user/<int:user_id>', methods=['DELETE'])
+def delete_user(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    db.session.delete(user)
+    db.session.commit()
+    return jsonify({'message': f'User {user.username} deleted successfully'}), 200
+
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
