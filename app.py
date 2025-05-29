@@ -69,6 +69,10 @@ def delete_user(user_id):
 
     db.session.delete(user)
     db.session.commit()
+
+    db.session.execute("SELECT setval('user_id_seq', COALESCE((SELECT MAX(id) FROM \"user\"), 1), false);")
+    db.session.commit()
+
     return jsonify({'message': f'User {user.username} deleted successfully'}), 200
 
 
