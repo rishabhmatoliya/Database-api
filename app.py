@@ -75,9 +75,6 @@ def delete_user(user_id):
         u.id = index
     db.session.commit()
 
-    # Reset sequence
-    db.session.execute("SELECT setval('user_id_seq', (SELECT MAX(id) FROM \"user\"));")
-    db.session.commit()
 
     return jsonify({'message': f'User {user.username} deleted successfully'}), 200
 
