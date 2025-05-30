@@ -18,6 +18,10 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
 migrate = Migrate(app, db)
+@app.route("/")
+def home():
+    return "API is running!"
+
 
 @app.route('/signup', methods=['POST'])
 def signup():
