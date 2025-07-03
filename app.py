@@ -10,14 +10,15 @@ app = Flask(__name__)
 CORS(app)
 
 # Set your DATABASE URL in environment variables or hardcode here (not recommended)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
-    'DATABASE_URL',
-    'postgresql://myapp_db_kcws_user:g1y5Cbar0Hez50awL6G723G5pFdVkZUk@dpg-d0s3ig24d50c73b825m0-a.oregon-postgres.render.com/myapp_db_kcws'
-)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://neondb_owner:npg_TWF9I4brmPwj@ep-royal-union-a1glk6v4-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
 migrate = Migrate(app, db)
+@app.route("/")
+def home():
+    return "API is running!"
+
 
 @app.route('/signup', methods=['POST'])
 def signup():
@@ -59,6 +60,25 @@ def get_all_users():
     users = User.query.with_entities(User.id, User.username, User.phone, User.email).all()
     users_list = [dict(id=u.id, username=u.username, phone=u.phone, email=u.email) for u in users]
     return jsonify(users_list)
+
+# Route: Delete User (Admin only)
+@app.route('/delete_user/<int:user_id>', methods=['DELETE'])
+def delete_user(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    db.session.delete(user)
+    db.session.commit()
+
+    users = User.query.order_by(User.id).all()
+    for index, u in enumerate(users, start=1):
+        u.id = index
+    db.session.commit()
+
+
+    return jsonify({'message': f'User {user.username} deleted successfully'}), 200
+
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
